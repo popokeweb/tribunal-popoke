@@ -8,345 +8,282 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
- 
-  :root {
-    --green: #1D9E75;
-    --green-light: #E1F5EE;
-    --green-dark: #085041;
-    --red: #E24B4A;
-    --red-light: #FCEBEB;
-    --red-dark: #501313;
-    --bg: #0e0e0e;
-    --bg2: #161616;
-    --bg3: #1e1e1e;
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.14);
-    --text: #f0f0f0;
-    --text2: #888;
-    --text3: #555;
-    --accent: #f5c842;
-  }
- 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-  }
- 
-  /* Header */
-  .header {
-    border-bottom: 1px solid var(--border);
-    padding: 2rem 2rem 1.5rem;
-    display: flex;
-    align-items: flex-end;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-  .header-title { flex: 1; }
-  .header-title h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(2.5rem, 6vw, 4rem);
-    letter-spacing: 2px;
-    color: var(--text);
-    line-height: 1;
-  }
-  .header-title h1 span { color: var(--accent); }
-  .header-title p {
-    font-size: 13px;
-    color: var(--text2);
-    margin-top: 4px;
-  }
-  .header-stats {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-  }
-  .stat { text-align: right; }
-  .stat-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2rem;
-    line-height: 1;
-    color: var(--text);
-  }
-  .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
- 
-  /* Add member bar */
-  .add-bar {
-    padding: 1rem 2rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .add-bar input {
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    padding: 7px 12px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .add-bar input:focus { border-color: var(--accent); }
-  .add-bar input::placeholder { color: var(--text3); }
-  #inp-name { width: 160px; }
-  #inp-user { width: 140px; }
-  .btn-add {
-    background: var(--accent);
-    color: #111;
-    border: none;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 7px 16px;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-  .btn-add:hover { opacity: 0.85; }
-  .btn-add:disabled { opacity: 0.4; cursor: not-allowed; }
- 
-  /* Layout */
-  .main { padding: 1.5rem 2rem; max-width: 860px; margin: 0 auto; }
- 
-  .sort-label {
-    font-size: 11px;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 1rem;
-  }
- 
-  /* Member card */
-  .member-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    margin-bottom: 8px;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .member-card:hover { border-color: var(--border2); }
-  .member-card.rank-top { border-left: 3px solid var(--green); }
-  .member-card.rank-bot { border-left: 3px solid var(--red); }
- 
-  .card-main {
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
- 
-  .rank-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
-    color: var(--text3);
-    min-width: 28px;
-    text-align: right;
-  }
- 
-  .avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 600;
-    flex-shrink: 0;
-  }
- 
-  .member-info { flex: 1; min-width: 100px; }
-  .member-name { font-size: 14px; font-weight: 600; color: var(--text); }
-  .member-user { font-size: 12px; color: var(--text2); }
- 
-  .score-pill {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.1rem;
-    padding: 2px 10px;
-    border-radius: 99px;
-    letter-spacing: 1px;
-  }
-  .score-pos { background: rgba(29,158,117,0.15); color: var(--green); }
-  .score-neg { background: rgba(226,75,74,0.15); color: var(--red); }
-  .score-neu { background: var(--bg3); color: var(--text3); }
- 
-  .votes-row { display: flex; gap: 6px; align-items: center; }
- 
-  .vote-btn {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border2);
-    background: var(--bg3);
-    color: var(--text2);
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    transition: all 0.15s;
-  }
-  .vote-btn:hover { border-color: var(--border2); background: var(--bg); }
-  .vote-btn.voted-green { background: rgba(29,158,117,0.12); border-color: var(--green); color: var(--green); }
-  .vote-btn.voted-red { background: rgba(226,75,74,0.12); border-color: var(--red); color: var(--red); }
-  .vote-icon { font-size: 14px; }
- 
-  .defense-preview {
-    margin: 0 16px 10px 16px;
-    padding: 8px 12px;
-    background: rgba(29,158,117,0.07);
-    border-left: 2px solid var(--green);
-    border-radius: 0 6px 6px 0;
-    font-size: 12px;
-    color: #9fdfc8;
-    line-height: 1.5;
-    font-style: italic;
-  }
-  .defense-preview .defense-label {
-    font-size: 10px;
-    font-style: normal;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--green);
-    font-weight: 600;
-    margin-bottom: 3px;
-  }
-  .expand-btn {
-    background: none;
-    border: none;
-    color: var(--text3);
-    font-size: 11px;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    padding: 0 16px 10px;
-    display: block;
-    transition: color 0.15s;
-  }
-  .expand-btn:hover { color: var(--text2); }
- 
-  /* Comments section */
-  .comments-section {
-    border-top: 1px solid var(--border);
-    padding: 12px 16px;
-    animation: fadeIn 0.15s ease;
-  }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
- 
-  .comment-item {
-    font-size: 12px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    margin-bottom: 6px;
-    line-height: 1.5;
-  }
-  .comment-defense {
-    background: rgba(29,158,117,0.08);
-    border-left: 2px solid var(--green);
-    color: #9fdfc8;
-  }
-  .comment-accuse {
-    background: rgba(226,75,74,0.08);
-    border-left: 2px solid var(--red);
-    color: #f5a0a0;
-  }
-  .comment-meta { font-size: 10px; opacity: 0.6; margin-bottom: 3px; }
- 
-  .defense-area { margin-top: 10px; }
-  .defense-area label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; }
-  .defense-area textarea {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    padding: 8px 10px;
-    resize: vertical;
-    min-height: 52px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .defense-area textarea:focus { border-color: var(--green); }
-  .defense-area textarea::placeholder { color: var(--text3); }
- 
-  .accuse-row { display: flex; gap: 6px; margin-top: 8px; }
-  .accuse-row input {
-    flex: 1;
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    padding: 6px 10px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .accuse-row input:focus { border-color: var(--red); }
-  .accuse-row input::placeholder { color: var(--text3); }
- 
-  .btn-small {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 6px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    border: none;
-    transition: opacity 0.15s;
-    white-space: nowrap;
-  }
-  .btn-small:hover { opacity: 0.8; }
-  .btn-save { background: rgba(29,158,117,0.2); color: var(--green); margin-top: 6px; }
-  .btn-accuse { background: rgba(226,75,74,0.2); color: var(--red); }
- 
-  /* Loading / empty */
-  .loading { text-align: center; padding: 3rem; color: var(--text2); font-size: 14px; }
-  .loading-dot { display: inline-block; animation: blink 1s infinite; }
-  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
-  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes blink { 0%,80%,100% { opacity: 0; } 40% { opacity: 1; } }
- 
-  .toast {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    padding: 10px 16px;
-    font-size: 13px;
-    color: var(--text);
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.2s;
-    pointer-events: none;
-    z-index: 999;
-  }
-  .toast.show { opacity: 1; transform: translateY(0); }
-  .toast.ok { border-color: var(--green); color: var(--green); }
-  .toast.err { border-color: var(--red); color: var(--red); }
- 
-  @media (max-width: 600px) {
-    .header { padding: 1.25rem; }
-    .main { padding: 1rem; }
-    .add-bar { padding: 0.75rem 1rem; }
-    #inp-name, #inp-user { width: 130px; }
-    .votes-row { margin-left: auto; }
-  }
+
+:root {
+  --green: #1D9E75;
+  --green-light: #E1F5EE;
+  --green-dark: #085041;
+  --red: #E24B4A;
+  --red-light: #FCEBEB;
+  --red-dark: #501313;
+  --bg: #0e0e0e;
+  --bg2: #161616;
+  --bg3: #1e1e1e;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0f0f0;
+  --text2: #888;
+  --text3: #555;
+  --accent: #f5c842;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+.header {
+  border-bottom: 1px solid var(--border);
+  padding: 2rem 2rem 1.5rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.header-title { flex: 1; }
+.header-title h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  letter-spacing: 2px;
+  color: var(--text);
+  line-height: 1;
+}
+.header-title h1 span { color: var(--accent); }
+.header-title p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.header-stats { display: flex; gap: 1.5rem; align-items: center; }
+.stat { text-align: right; }
+.stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--text);
+}
+.stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+
+.main { padding: 1.5rem 2rem; max-width: 860px; margin: 0 auto; }
+.sort-label {
+  font-size: 11px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+}
+
+.member-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.member-card:hover { border-color: var(--border2); }
+.member-card.rank-top { border-left: 3px solid var(--green); }
+.member-card.rank-bot { border-left: 3px solid var(--red); }
+
+.card-main {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.rank-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  color: var(--text3);
+  min-width: 28px;
+  text-align: right;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.member-info { flex: 1; min-width: 100px; }
+.member-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.member-user { font-size: 12px; color: var(--text2); }
+
+.score-pill {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  padding: 2px 10px;
+  border-radius: 99px;
+  letter-spacing: 1px;
+}
+.score-pos { background: rgba(29,158,117,0.15); color: var(--green); }
+.score-neg { background: rgba(226,75,74,0.15); color: var(--red); }
+.score-neu { background: var(--bg3); color: var(--text3); }
+
+.votes-row { display: flex; gap: 6px; align-items: center; }
+
+.vote-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text2);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+.vote-btn:hover { border-color: var(--border2); background: var(--bg); }
+.vote-btn.voted-green { background: rgba(29,158,117,0.12); border-color: var(--green); color: var(--green); }
+.vote-btn.voted-red { background: rgba(226,75,74,0.12); border-color: var(--red); color: var(--red); }
+.vote-icon { font-size: 14px; }
+
+.defense-preview {
+  margin: 0 16px 10px 16px;
+  padding: 8px 12px;
+  background: rgba(29,158,117,0.07);
+  border-left: 2px solid var(--green);
+  border-radius: 0 6px 6px 0;
+  font-size: 12px;
+  color: #9fdfc8;
+  line-height: 1.5;
+  font-style: italic;
+}
+.defense-preview .defense-label {
+  font-size: 10px;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--green);
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+.expand-btn {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 11px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  padding: 0 16px 10px;
+  display: block;
+  transition: color 0.15s;
+}
+.expand-btn:hover { color: var(--text2); }
+
+.comments-section {
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  animation: fadeIn 0.15s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+.comment-item {
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+.comment-defense { background: rgba(29,158,117,0.08); border-left: 2px solid var(--green); color: #9fdfc8; }
+.comment-accuse { background: rgba(226,75,74,0.08); border-left: 2px solid var(--red); color: #f5a0a0; }
+.comment-meta { font-size: 10px; opacity: 0.6; margin-bottom: 3px; }
+
+.defense-area { margin-top: 10px; }
+.defense-area label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; }
+.defense-area textarea {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  padding: 8px 10px;
+  resize: vertical;
+  min-height: 52px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.defense-area textarea:focus { border-color: var(--green); }
+.defense-area textarea::placeholder { color: var(--text3); }
+
+.accuse-row { display: flex; gap: 6px; margin-top: 8px; }
+.accuse-row input {
+  flex: 1;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.accuse-row input:focus { border-color: var(--red); }
+.accuse-row input::placeholder { color: var(--text3); }
+
+.btn-small {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.btn-small:hover { opacity: 0.8; }
+.btn-save { background: rgba(29,158,117,0.2); color: var(--green); margin-top: 6px; }
+.btn-accuse { background: rgba(226,75,74,0.2); color: var(--red); }
+
+.loading { text-align: center; padding: 3rem; color: var(--text2); font-size: 14px; }
+.loading-dot { display: inline-block; animation: blink 1s infinite; }
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100% { opacity: 0; } 40% { opacity: 1; } }
+
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--text);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.2s;
+  pointer-events: none;
+  z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.ok { border-color: var(--green); color: var(--green); }
+.toast.err { border-color: var(--red); color: var(--red); }
+
+@media (max-width: 600px) {
+  .header { padding: 1.25rem; }
+  .main { padding: 1rem; }
+  .votes-row { margin-left: auto; }
+}
 </style>
 </head>
 <body>
- 
+
 <header class="header">
   <div class="header-title">
     <h1>TRIBUNAL <span>POPOKE</span></h1>
@@ -363,97 +300,110 @@
     </div>
   </div>
 </header>
- 
- 
- 
+
 <div class="main">
   <div class="sort-label">Ordenados por puntuación neta — verde arriba, rojo abajo</div>
   <div id="list"><div class="loading"><span class="loading-dot">•</span><span class="loading-dot">•</span><span class="loading-dot">•</span></div></div>
 </div>
- 
+
 <div class="toast" id="toast"></div>
- 
+
 <script>
 const SUPABASE_URL = 'https://wqgfzealpghlripqgqlg.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxZ2Z6ZWFscGdobHJpcHFncWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MzU5NjgsImV4cCI6MjA5MzIxMTk2OH0.PiU7nBt5xS7qjNLroa3MgX-LkLCT_6MkfPG5p1pRp80';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
- 
+
 let members = [];
 let votes = {};
 let accusations = {};
 let userVotes = JSON.parse(localStorage.getItem('userVotes') || '{}');
 let expanded = {};
- 
+
 const AVATAR_COLORS = [
   ['#1a2a3a','#5ba4d4'],['#1a2218','#5db87a'],['#2a1a1a','#d47a5b'],
   ['#231a2a','#9a70d4'],['#2a2218','#d4b040'],['#1a2228','#5bc4c4'],
 ];
- 
+
 function getAvatarStyle(id) {
   const i = (id.charCodeAt(0) + id.charCodeAt(id.length-1)) % AVATAR_COLORS.length;
   return `background:${AVATAR_COLORS[i][0]};color:${AVATAR_COLORS[i][1]}`;
 }
- 
+
 function initials(name) {
   return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
 }
- 
+
 function score(m) {
   const v = votes[m.id] || {green:0,red:0};
   return v.green - v.red;
 }
- 
+
 function toast(msg, type='ok') {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.className = 'toast show ' + type;
   setTimeout(() => el.className = 'toast', 2200);
 }
- 
+
+// Función que carga TODAS las filas paginando de 1000 en 1000
+async function fetchAll(table, columns) {
+  let allData = [];
+  let from = 0;
+  const pageSize = 1000;
+  while (true) {
+    const { data, error } = await sb.from(table).select(columns).range(from, from + pageSize - 1);
+    if (error || !data || data.length === 0) break;
+    allData = allData.concat(data);
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
+  return allData;
+}
+
 async function loadAll() {
-  const [mRes, vRes, aRes] = await Promise.all([
-    sb.from('members').select('id, name, username, defense, created_at').order('created_at'),
-    sb.from('votes').select('*'),
-    sb.from('accusations').select('*'),
+  const [membersData, votesData, accusationsData] = await Promise.all([
+    sb.from('members').select('id, name, username, defense, created_at').order('created_at').then(r => r.data || []),
+    fetchAll('votes', '*'),
+    fetchAll('accusations', '*'),
   ]);
- 
-  members = mRes.data || [];
- 
+
+  members = membersData;
+
   votes = {};
-  for (const v of (vRes.data||[])) {
+  for (const v of votesData) {
     if (!votes[v.member_id]) votes[v.member_id] = {green:0,red:0};
     votes[v.member_id][v.type]++;
   }
- 
+
   accusations = {};
-  for (const a of (aRes.data||[])) {
+  for (const a of accusationsData) {
     if (!accusations[a.member_id]) accusations[a.member_id] = [];
     accusations[a.member_id].push(a);
   }
- 
+
   updateStats();
   render();
 }
- 
+
 function updateStats() {
   document.getElementById('stat-members').textContent = members.length;
   let total = 0;
   Object.values(votes).forEach(v => total += v.green + v.red);
   document.getElementById('stat-votes').textContent = total;
 }
- 
+
 function sorted() {
   return [...members].sort((a,b) => score(b) - score(a));
 }
- 
+
 function render() {
   const list = document.getElementById('list');
   const s = sorted();
   if (!s.length) {
-    list.innerHTML = '<div class="loading" style="color:var(--text3)">Añade el primer miembro para empezar</div>';
+    list.innerHTML = '<div class="loading" style="color:var(--text3)">Sin miembros</div>';
     return;
   }
- 
+
   list.innerHTML = s.map((m, i) => {
     const v = votes[m.id] || {green:0,red:0};
     const sc = score(m);
@@ -464,13 +414,13 @@ function render() {
     const vr = userVotes[m.id]==='red';
     const isOpen = expanded[m.id];
     const accList = accusations[m.id] || [];
- 
+
     let commentsHtml = '';
     if (m.defense) commentsHtml += `<div class="comment-item comment-defense"><div class="comment-meta">Defensa del miembro</div>${escHtml(m.defense)}</div>`;
     accList.forEach(a => {
       commentsHtml += `<div class="comment-item comment-accuse"><div class="comment-meta">Acusación</div>${escHtml(a.text)}</div>`;
     });
- 
+
     return `<div class="${cardClass}" id="card-${m.id}">
       <div class="card-main">
         <span class="rank-num">#${i+1}</span>
@@ -505,15 +455,15 @@ function render() {
     </div>`;
   }).join('');
 }
- 
+
 function escHtml(str) {
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
- 
+
 async function vote(memberId, type) {
   const prev = userVotes[memberId];
   if (!votes[memberId]) votes[memberId] = {green:0,red:0};
- 
+
   if (prev === type) {
     userVotes[memberId] = null;
     votes[memberId][type] = Math.max(0, votes[memberId][type] - 1);
@@ -527,17 +477,17 @@ async function vote(memberId, type) {
     votes[memberId][type]++;
     await sb.from('votes').insert({member_id: memberId, type});
   }
- 
+
   localStorage.setItem('userVotes', JSON.stringify(userVotes));
   updateStats();
   render();
 }
- 
+
 function toggleExpand(id) {
   expanded[id] = !expanded[id];
   render();
 }
- 
+
 async function saveDefense(memberId) {
   const el = document.getElementById('def-' + memberId);
   if (!el) return;
@@ -552,7 +502,7 @@ async function saveDefense(memberId) {
     toast('Error al guardar', 'err');
   }
 }
- 
+
 async function addAccusation(memberId) {
   const el = document.getElementById('acc-' + memberId);
   if (!el) return;
@@ -569,8 +519,9 @@ async function addAccusation(memberId) {
     toast('Error al añadir', 'err');
   }
 }
- 
+
 loadAll();
 </script>
+
 </body>
 </html>
