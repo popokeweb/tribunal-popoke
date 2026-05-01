@@ -387,6 +387,7 @@ let votes = {};
 let accusations = {};
 let userVotes = JSON.parse(localStorage.getItem('userVotes') || '{}');
 let expanded = {};
+const myToken = new URLSearchParams(window.location.search).get('token');
 
 const AVATAR_COLORS = [
   ['#1a2a3a','#5ba4d4'],['#1a2218','#5db87a'],['#2a1a1a','#d47a5b'],
@@ -416,7 +417,7 @@ function toast(msg, type='ok') {
 
 async function loadAll() {
   const [mRes, vRes, aRes] = await Promise.all([
-    sb.from('members').select('*').order('created_at'),
+    sb.from('members').select('id, name, username, defense, token, created_at').order('created_at'),
     sb.from('votes').select('*'),
     sb.from('accusations').select('*'),
   ]);
@@ -493,14 +494,14 @@ function render() {
         </div>
       </div>
       ${m.defense ? `<div class="defense-preview"><div class="defense-label">Su defensa</div>${escHtml(m.defense)}</div>` : ''}
-      <button class="expand-btn" onclick="toggleExpand('${m.id}')">${isOpen ? '▲ Ocultar comentarios' : '▼ Editar defensa y acusaciones'}</button>
+      <button class="expand-btn" onclick="toggleExpand('${m.id}')">${isOpen ? '▲ Ocultar' : (myToken === m.token ? '▼ Editar tu defensa y ver acusaciones' : '▼ Ver acusaciones')}</button>
       ${isOpen ? `<div class="comments-section">
         ${commentsHtml}
-        <div class="defense-area">
-          <label>Defensa del miembro</label>
-          <textarea id="def-${m.id}" placeholder="¿Por qué debería quedarse?">${escHtml(m.defense||'')}</textarea>
+        ${myToken === m.token ? `<div class="defense-area">
+          <label>Tu defensa</label>
+          <textarea id="def-${m.id}" placeholder="¿Por qué deberías quedarte?">${escHtml(m.defense||'')}</textarea>
           <button class="btn-small btn-save" onclick="saveDefense('${m.id}')">Guardar defensa</button>
-        </div>
+        </div>` : ''}
         <div class="accuse-row">
           <input id="acc-${m.id}" placeholder="Razón para echarlo..." maxlength="200" />
           <button class="btn-small btn-accuse" onclick="addAccusation('${m.id}')">+ Acusación</button>
@@ -543,13 +544,14 @@ function toggleExpand(id) {
 }
 
 async function saveDefense(memberId) {
+  const m = members.find(x=>x.id===memberId);
+  if (!m || myToken !== m.token) { toast('No autorizado', 'err'); return; }
   const el = document.getElementById('def-' + memberId);
   if (!el) return;
   const text = el.value.trim();
-  const {error} = await sb.from('members').update({defense: text}).eq('id', memberId);
+  const {error} = await sb.from('members').update({defense: text}).eq('id', memberId).eq('token', myToken);
   if (!error) {
-    const m = members.find(x=>x.id===memberId);
-    if (m) m.defense = text;
+    m.defense = text;
     toast('Defensa guardada');
     render();
   } else {
