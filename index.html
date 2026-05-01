@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tribunal PoPoke</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --green-dark: #085041;
+    --red: #E24B4A;
+    --red-light: #FCEBEB;
+    --red-dark: #501313;
+    --bg: #0e0e0e;
+    --bg2: #161616;
+    --bg3: #1e1e1e;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f0f0;
+    --text2: #888;
+    --text3: #555;
+    --accent: #f5c842;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 2rem 1.5rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .header-title { flex: 1; }
+  .header-title h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    letter-spacing: 2px;
+    color: var(--text);
+    line-height: 1;
+  }
+  .header-title h1 span { color: var(--accent); }
+  .header-title p {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+  .header-stats {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  .stat { text-align: right; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--text);
+  }
+  .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Add member bar */
+  .add-bar {
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .add-bar input {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 7px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .add-bar input:focus { border-color: var(--accent); }
+  .add-bar input::placeholder { color: var(--text3); }
+  #inp-name { width: 160px; }
+  #inp-user { width: 140px; }
+  .btn-add {
+    background: var(--accent);
+    color: #111;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 16px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-add:hover { opacity: 0.85; }
+  .btn-add:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Layout */
+  .main { padding: 1.5rem 2rem; max-width: 860px; margin: 0 auto; }
+
+  .sort-label {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+  }
+
+  /* Member card */
+  .member-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .member-card:hover { border-color: var(--border2); }
+  .member-card.rank-top { border-left: 3px solid var(--green); }
+  .member-card.rank-bot { border-left: 3px solid var(--red); }
+
+  .card-main {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .rank-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--text3);
+    min-width: 28px;
+    text-align: right;
+  }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .member-info { flex: 1; min-width: 100px; }
+  .member-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .member-user { font-size: 12px; color: var(--text2); }
+
+  .score-pill {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    padding: 2px 10px;
+    border-radius: 99px;
+    letter-spacing: 1px;
+  }
+  .score-pos { background: rgba(29,158,117,0.15); color: var(--green); }
+  .score-neg { background: rgba(226,75,74,0.15); color: var(--red); }
+  .score-neu { background: var(--bg3); color: var(--text3); }
+
+  .votes-row { display: flex; gap: 6px; align-items: center; }
+
+  .vote-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .vote-btn:hover { border-color: var(--border2); background: var(--bg); }
+  .vote-btn.voted-green { background: rgba(29,158,117,0.12); border-color: var(--green); color: var(--green); }
+  .vote-btn.voted-red { background: rgba(226,75,74,0.12); border-color: var(--red); color: var(--red); }
+  .vote-icon { font-size: 14px; }
+
+  .expand-btn {
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    padding: 0 16px 10px;
+    display: block;
+    transition: color 0.15s;
+  }
+  .expand-btn:hover { color: var(--text2); }
+
+  /* Comments section */
+  .comments-section {
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    animation: fadeIn 0.15s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .comment-item {
+    font-size: 12px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    line-height: 1.5;
+  }
+  .comment-defense {
+    background: rgba(29,158,117,0.08);
+    border-left: 2px solid var(--green);
+    color: #9fdfc8;
+  }
+  .comment-accuse {
+    background: rgba(226,75,74,0.08);
+    border-left: 2px solid var(--red);
+    color: #f5a0a0;
+  }
+  .comment-meta { font-size: 10px; opacity: 0.6; margin-bottom: 3px; }
+
+  .defense-area { margin-top: 10px; }
+  .defense-area label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; }
+  .defense-area textarea {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 8px 10px;
+    resize: vertical;
+    min-height: 52px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .defense-area textarea:focus { border-color: var(--green); }
+  .defense-area textarea::placeholder { color: var(--text3); }
+
+  .accuse-row { display: flex; gap: 6px; margin-top: 8px; }
+  .accuse-row input {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 6px 10px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .accuse-row input:focus { border-color: var(--red); }
+  .accuse-row input::placeholder { color: var(--text3); }
+
+  .btn-small {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  .btn-small:hover { opacity: 0.8; }
+  .btn-save { background: rgba(29,158,117,0.2); color: var(--green); margin-top: 6px; }
+  .btn-accuse { background: rgba(226,75,74,0.2); color: var(--red); }
+
+  /* Loading / empty */
+  .loading { text-align: center; padding: 3rem; color: var(--text2); font-size: 14px; }
+  .loading-dot { display: inline-block; animation: blink 1s infinite; }
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,80%,100% { opacity: 0; } 40% { opacity: 1; } }
+
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--text);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.2s;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.ok { border-color: var(--green); color: var(--green); }
+  .toast.err { border-color: var(--red); color: var(--red); }
+
+  @media (max-width: 600px) {
+    .header { padding: 1.25rem; }
+    .main { padding: 1rem; }
+    .add-bar { padding: 0.75rem 1rem; }
+    #inp-name, #inp-user { width: 130px; }
+    .votes-row { margin-left: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-title">
+    <h1>TRIBUNAL <span>POPOKE</span></h1>
+    <p>Vota quién se queda y quién se va del canal</p>
+  </div>
+  <div class="header-stats">
+    <div class="stat">
+      <div class="stat-num" id="stat-members">—</div>
+      <div class="stat-label">miembros</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-votes">—</div>
+      <div class="stat-label">votos totales</div>
+    </div>
+  </div>
+</header>
+
+<div class="add-bar">
+  <input id="inp-name" placeholder="Nombre" maxlength="40" />
+  <input id="inp-user" placeholder="@username" maxlength="40" />
+  <button class="btn-add" id="btn-add" onclick="addMember()">+ Añadir</button>
+</div>
+
+<div class="main">
+  <div class="sort-label">Ordenados por puntuación neta — verde arriba, rojo abajo</div>
+  <div id="list"><div class="loading"><span class="loading-dot">•</span><span class="loading-dot">•</span><span class="loading-dot">•</span></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://wqgfzealpghlripqgqlg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_ZztKJut4zXWHrjwczn3v5Q_syTJ6qUw';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let members = [];
+let votes = {};
+let accusations = {};
+let userVotes = JSON.parse(localStorage.getItem('userVotes') || '{}');
+let expanded = {};
+
+const AVATAR_COLORS = [
+  ['#1a2a3a','#5ba4d4'],['#1a2218','#5db87a'],['#2a1a1a','#d47a5b'],
+  ['#231a2a','#9a70d4'],['#2a2218','#d4b040'],['#1a2228','#5bc4c4'],
+];
+
+function getAvatarStyle(id) {
+  const i = (id.charCodeAt(0) + id.charCodeAt(id.length-1)) % AVATAR_COLORS.length;
+  return `background:${AVATAR_COLORS[i][0]};color:${AVATAR_COLORS[i][1]}`;
+}
+
+function initials(name) {
+  return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+}
+
+function score(m) {
+  const v = votes[m.id] || {green:0,red:0};
+  return v.green - v.red;
+}
+
+function toast(msg, type='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  setTimeout(() => el.className = 'toast', 2200);
+}
+
+async function loadAll() {
+  const [mRes, vRes, aRes] = await Promise.all([
+    sb.from('members').select('*').order('created_at'),
+    sb.from('votes').select('*'),
+    sb.from('accusations').select('*'),
+  ]);
+
+  members = mRes.data || [];
+
+  votes = {};
+  for (const v of (vRes.data||[])) {
+    if (!votes[v.member_id]) votes[v.member_id] = {green:0,red:0};
+    votes[v.member_id][v.type]++;
+  }
+
+  accusations = {};
+  for (const a of (aRes.data||[])) {
+    if (!accusations[a.member_id]) accusations[a.member_id] = [];
+    accusations[a.member_id].push(a);
+  }
+
+  updateStats();
+  render();
+}
+
+function updateStats() {
+  document.getElementById('stat-members').textContent = members.length;
+  let total = 0;
+  Object.values(votes).forEach(v => total += v.green + v.red);
+  document.getElementById('stat-votes').textContent = total;
+}
+
+function sorted() {
+  return [...members].sort((a,b) => score(b) - score(a));
+}
+
+function render() {
+  const list = document.getElementById('list');
+  const s = sorted();
+  if (!s.length) {
+    list.innerHTML = '<div class="loading" style="color:var(--text3)">Añade el primer miembro para empezar</div>';
+    return;
+  }
+
+  list.innerHTML = s.map((m, i) => {
+    const v = votes[m.id] || {green:0,red:0};
+    const sc = score(m);
+    const scClass = sc>0 ? 'score-pill score-pos' : sc<0 ? 'score-pill score-neg' : 'score-pill score-neu';
+    const scTxt = sc>0 ? '+'+sc : ''+sc;
+    const cardClass = i===0 ? 'member-card rank-top' : (i===s.length-1 ? 'member-card rank-bot' : 'member-card');
+    const vg = userVotes[m.id]==='green';
+    const vr = userVotes[m.id]==='red';
+    const isOpen = expanded[m.id];
+    const accList = accusations[m.id] || [];
+
+    let commentsHtml = '';
+    if (m.defense) commentsHtml += `<div class="comment-item comment-defense"><div class="comment-meta">Defensa del miembro</div>${escHtml(m.defense)}</div>`;
+    accList.forEach(a => {
+      commentsHtml += `<div class="comment-item comment-accuse"><div class="comment-meta">Acusación</div>${escHtml(a.text)}</div>`;
+    });
+
+    return `<div class="${cardClass}" id="card-${m.id}">
+      <div class="card-main">
+        <span class="rank-num">#${i+1}</span>
+        <div class="avatar" style="${getAvatarStyle(m.id)}">${initials(m.name)}</div>
+        <div class="member-info">
+          <div class="member-name">${escHtml(m.name)} <span class="${scClass}">${scTxt}</span></div>
+          <div class="member-user">${escHtml(m.username)}</div>
+        </div>
+        <div class="votes-row">
+          <button class="vote-btn ${vg?'voted-green':''}" onclick="vote('${m.id}','green')">
+            <span class="vote-icon">👍</span> ${v.green}
+          </button>
+          <button class="vote-btn ${vr?'voted-red':''}" onclick="vote('${m.id}','red')">
+            <span class="vote-icon">👎</span> ${v.red}
+          </button>
+        </div>
+      </div>
+      <button class="expand-btn" onclick="toggleExpand('${m.id}')">${isOpen ? '▲ Ocultar' : '▼ Defensa y acusaciones'}</button>
+      ${isOpen ? `<div class="comments-section">
+        ${commentsHtml}
+        <div class="defense-area">
+          <label>Defensa del miembro</label>
+          <textarea id="def-${m.id}" placeholder="¿Por qué debería quedarse?">${escHtml(m.defense||'')}</textarea>
+          <button class="btn-small btn-save" onclick="saveDefense('${m.id}')">Guardar defensa</button>
+        </div>
+        <div class="accuse-row">
+          <input id="acc-${m.id}" placeholder="Razón para echarlo..." maxlength="200" />
+          <button class="btn-small btn-accuse" onclick="addAccusation('${m.id}')">+ Acusación</button>
+        </div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function escHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function vote(memberId, type) {
+  const prev = userVotes[memberId];
+  if (!votes[memberId]) votes[memberId] = {green:0,red:0};
+
+  if (prev === type) {
+    userVotes[memberId] = null;
+    votes[memberId][type] = Math.max(0, votes[memberId][type] - 1);
+    await sb.from('votes').delete().eq('member_id', memberId).eq('type', type).limit(1);
+  } else {
+    if (prev) {
+      votes[memberId][prev] = Math.max(0, votes[memberId][prev] - 1);
+      await sb.from('votes').delete().eq('member_id', memberId).eq('type', prev).limit(1);
+    }
+    userVotes[memberId] = type;
+    votes[memberId][type]++;
+    await sb.from('votes').insert({member_id: memberId, type});
+  }
+
+  localStorage.setItem('userVotes', JSON.stringify(userVotes));
+  updateStats();
+  render();
+}
+
+function toggleExpand(id) {
+  expanded[id] = !expanded[id];
+  render();
+}
+
+async function saveDefense(memberId) {
+  const el = document.getElementById('def-' + memberId);
+  if (!el) return;
+  const text = el.value.trim();
+  const {error} = await sb.from('members').update({defense: text}).eq('id', memberId);
+  if (!error) {
+    const m = members.find(x=>x.id===memberId);
+    if (m) m.defense = text;
+    toast('Defensa guardada');
+    render();
+  } else {
+    toast('Error al guardar', 'err');
+  }
+}
+
+async function addAccusation(memberId) {
+  const el = document.getElementById('acc-' + memberId);
+  if (!el) return;
+  const text = el.value.trim();
+  if (!text) return;
+  const {data, error} = await sb.from('accusations').insert({member_id: memberId, text}).select().single();
+  if (!error && data) {
+    if (!accusations[memberId]) accusations[memberId] = [];
+    accusations[memberId].push(data);
+    el.value = '';
+    toast('Acusación añadida');
+    render();
+  } else {
+    toast('Error al añadir', 'err');
+  }
+}
+
+async function addMember() {
+  const name = document.getElementById('inp-name').value.trim();
+  const username = document.getElementById('inp-user').value.trim();
+  if (!name) { toast('Escribe un nombre', 'err'); return; }
+  const btn = document.getElementById('btn-add');
+  btn.disabled = true;
+  const {data, error} = await sb.from('members').insert({name, username: username||'@?', defense:''}).select().single();
+  if (!error && data) {
+    members.push(data);
+    document.getElementById('inp-name').value = '';
+    document.getElementById('inp-user').value = '';
+    updateStats();
+    render();
+    toast('Miembro añadido');
+  } else {
+    toast('Error al añadir', 'err');
+  }
+  btn.disabled = false;
+}
+
+// Enter key in add bar
+document.getElementById('inp-user').addEventListener('keydown', e => { if (e.key==='Enter') addMember(); });
+document.getElementById('inp-name').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('inp-user').focus(); });
+
+loadAll();
+</script>
+</body>
+</html>
