@@ -312,15 +312,40 @@ async function loadAll() {
   }
 
   // Tiempo real
-  sb.channel('rt').on('postgres_changes',{event:'INSERT',schema:'public',table:'votes'},p=>{
-    const {member_id,type}=p.new;
-    if(!votes[member_id]) votes[member_id]={green:0,red:0};
-    votes[member_id][type]++;
-    updateStats(); if(currentView==='ranking') softRender(member_id);
-  }).on('postgres_changes',{event:'DELETE',schema:'public',table:'votes'},p=>{
-    const {member_id,type}=p.old||{};
-    if(member_id&&votes[member_id]){votes[member_id][type]=Math.max(0,votes[member_id][type]-1);updateStats();if(currentView==='ranking')softRender(member_id);}
-  }).subscribe();
+  sb.channel('rt')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'votes'},p=>{
+      const {member_id,type}=p.new;
+      if(!votes[member_id]) votes[member_id]={green:0,red:0};
+      votes[member_id][type]++;
+      updateStats(); if(currentView==='ranking') softRender(member_id);
+    })
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'votes'},p=>{
+      const {member_id,type}=p.old||{};
+      if(member_id&&votes[member_id]){votes[member_id][type]=Math.max(0,votes[member_id][type]-1);updateStats();if(currentView==='ranking')softRender(member_id);}
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'defenses'},p=>{
+      const d=p.new; if(!d||!d.member_id) return;
+      if(!defenses[d.member_id]) defenses[d.member_id]=[];
+      // evitar duplicado si lo insertamos nosotros mismos
+      if(!defenses[d.member_id].find(x=>x.id===d.id)) {
+        defenses[d.member_id].push(d);
+        if(currentView==='ranking') renderRanking();
+      }
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'accusations'},p=>{
+      const a=p.new; if(!a||!a.member_id) return;
+      if(!accusations[a.member_id]) accusations[a.member_id]=[];
+      if(!accusations[a.member_id].find(x=>x.id===a.id)) {
+        accusations[a.member_id].push(a);
+        if(currentView==='ranking') renderRanking();
+      }
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'members'},p=>{
+      const upd=p.new; if(!upd||!upd.id) return;
+      const m=members.find(x=>x.id===upd.id);
+      if(m) { m.defense=upd.defense; if(currentView==='ranking') renderRanking(); }
+    })
+    .subscribe();
 
   updateStats();
   renderRanking();
