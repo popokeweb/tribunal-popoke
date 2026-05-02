@@ -7,15 +7,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   --green: #1D9E75;
-  --green-light: #E1F5EE;
-  --green-dark: #085041;
   --red: #E24B4A;
-  --red-light: #FCEBEB;
-  --red-dark: #501313;
   --bg: #0e0e0e;
   --bg2: #161616;
   --bg3: #1e1e1e;
@@ -27,156 +23,120 @@
   --accent: #f5c842;
 }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  min-height: 100vh;
-}
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
 
 .header {
   border-bottom: 1px solid var(--border);
   padding: 2rem 2rem 1.5rem;
-  display: flex;
-  align-items: flex-end;
-  gap: 1rem;
-  flex-wrap: wrap;
+  display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap;
 }
 .header-title { flex: 1; }
 .header-title h1 {
   font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(2.5rem, 6vw, 4rem);
-  letter-spacing: 2px;
-  color: var(--text);
-  line-height: 1;
+  letter-spacing: 2px; line-height: 1;
 }
 .header-title h1 span { color: var(--accent); }
 .header-title p { font-size: 13px; color: var(--text2); margin-top: 4px; }
-.header-stats { display: flex; gap: 1.5rem; align-items: center; }
+.header-stats { display: flex; gap: 1.5rem; }
 .stat { text-align: right; }
-.stat-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 2rem;
-  line-height: 1;
-  color: var(--text);
-}
+.stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; line-height: 1; }
 .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
 
-.main { padding: 1.5rem 2rem; max-width: 860px; margin: 0 auto; }
-.sort-label {
+/* Banner miembro propio */
+.member-banner {
+  background: linear-gradient(135deg, rgba(29,158,117,0.15), rgba(29,158,117,0.05));
+  border-bottom: 1px solid rgba(29,158,117,0.3);
+  padding: 12px 2rem;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: #9fdfc8;
+}
+.member-banner strong { color: var(--green); }
+.member-banner .copy-link {
+  margin-left: auto;
+  background: rgba(29,158,117,0.2);
+  border: 1px solid var(--green);
+  color: var(--green);
+  border-radius: 6px;
+  padding: 4px 10px;
   font-size: 11px;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 1rem;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
 }
 
+.main { padding: 1.5rem 2rem; max-width: 860px; margin: 0 auto; }
+.sort-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
+
 .member-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  margin-bottom: 8px;
-  overflow: hidden;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; margin-bottom: 8px; overflow: hidden;
   transition: border-color 0.2s;
 }
 .member-card:hover { border-color: var(--border2); }
 .member-card.rank-top { border-left: 3px solid var(--green); }
 .member-card.rank-bot { border-left: 3px solid var(--red); }
+.member-card.is-me { border-color: rgba(29,158,117,0.4); }
 
 .card-main {
   padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
 }
-
-.rank-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.4rem;
-  color: var(--text3);
-  min-width: 28px;
-  text-align: right;
-}
-
+.rank-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--text3); min-width: 28px; text-align: right; }
 .avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-  flex-shrink: 0;
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; flex-shrink: 0;
 }
-
 .member-info { flex: 1; min-width: 100px; }
-.member-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.member-name { font-size: 14px; font-weight: 600; }
 .member-user { font-size: 12px; color: var(--text2); }
+.me-badge {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  background: rgba(29,158,117,0.2); color: var(--green);
+  border-radius: 4px; padding: 1px 5px; letter-spacing: 0.5px;
+  vertical-align: middle; margin-left: 4px;
+}
 
 .score-pill {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.1rem;
-  padding: 2px 10px;
-  border-radius: 99px;
-  letter-spacing: 1px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem;
+  padding: 2px 10px; border-radius: 99px; letter-spacing: 1px;
 }
 .score-pos { background: rgba(29,158,117,0.15); color: var(--green); }
 .score-neg { background: rgba(226,75,74,0.15); color: var(--red); }
 .score-neu { background: var(--bg3); color: var(--text3); }
 
-.votes-row { display: flex; gap: 6px; align-items: center; }
-
+.votes-row { display: flex; gap: 6px; }
 .vote-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border2);
-  background: var(--bg3);
-  color: var(--text2);
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: 8px;
+  border: 1px solid var(--border2); background: var(--bg3);
+  color: var(--text2); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
   transition: all 0.15s;
 }
-.vote-btn:hover { border-color: var(--border2); background: var(--bg); }
+.vote-btn:hover { background: var(--bg); }
 .vote-btn.voted-green { background: rgba(29,158,117,0.12); border-color: var(--green); color: var(--green); }
 .vote-btn.voted-red { background: rgba(226,75,74,0.12); border-color: var(--red); color: var(--red); }
-.vote-icon { font-size: 14px; }
+.vote-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .defense-preview {
-  margin: 0 16px 10px 16px;
+  margin: 0 16px 10px;
   padding: 8px 12px;
   background: rgba(29,158,117,0.07);
   border-left: 2px solid var(--green);
   border-radius: 0 6px 6px 0;
-  font-size: 12px;
-  color: #9fdfc8;
-  line-height: 1.5;
-  font-style: italic;
+  font-size: 12px; color: #9fdfc8; line-height: 1.5; font-style: italic;
 }
 .defense-preview .defense-label {
-  font-size: 10px;
-  font-style: normal;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--green);
-  font-weight: 600;
-  margin-bottom: 3px;
+  font-size: 10px; font-style: normal; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--green); font-weight: 600; margin-bottom: 3px;
 }
+
 .expand-btn {
-  background: none;
-  border: none;
-  color: var(--text3);
-  font-size: 11px;
-  font-family: 'DM Sans', sans-serif;
-  cursor: pointer;
-  padding: 0 16px 10px;
-  display: block;
+  background: none; border: none; color: var(--text3);
+  font-size: 11px; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; padding: 0 16px 10px; display: block;
   transition: color 0.15s;
 }
 .expand-btn:hover { color: var(--text2); }
@@ -186,90 +146,84 @@ body {
   padding: 12px 16px;
   animation: fadeIn 0.15s ease;
 }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; } }
 
 .comment-item {
-  font-size: 12px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  margin-bottom: 6px;
-  line-height: 1.5;
+  font-size: 12px; padding: 8px 10px; border-radius: 6px;
+  margin-bottom: 6px; line-height: 1.5;
 }
 .comment-defense { background: rgba(29,158,117,0.08); border-left: 2px solid var(--green); color: #9fdfc8; }
 .comment-accuse { background: rgba(226,75,74,0.08); border-left: 2px solid var(--red); color: #f5a0a0; }
+.comment-own-defense {
+  background: rgba(29,158,117,0.12); border-left: 3px solid var(--green);
+  color: #9fdfc8;
+}
 .comment-meta { font-size: 10px; opacity: 0.6; margin-bottom: 3px; }
+
+/* Sección editar propia defensa */
+.own-defense-edit {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(29,158,117,0.06);
+  border: 1px solid rgba(29,158,117,0.2);
+  border-radius: 8px;
+}
+.own-defense-edit label {
+  font-size: 11px; color: var(--green); text-transform: uppercase;
+  letter-spacing: 1px; display: block; margin-bottom: 5px; font-weight: 600;
+}
+.own-defense-edit textarea {
+  width: 100%; background: var(--bg3); border: 1px solid rgba(29,158,117,0.3);
+  border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 12px; padding: 8px 10px; resize: vertical; min-height: 60px;
+  outline: none; transition: border-color 0.15s;
+}
+.own-defense-edit textarea:focus { border-color: var(--green); }
+.own-defense-edit textarea::placeholder { color: var(--text3); }
 
 .defense-area { margin-top: 10px; }
 .defense-area label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; }
 .defense-area textarea {
-  width: 100%;
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  padding: 8px 10px;
-  resize: vertical;
-  min-height: 52px;
-  outline: none;
-  transition: border-color 0.15s;
+  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 12px; padding: 8px 10px; resize: vertical; min-height: 52px;
+  outline: none; transition: border-color 0.15s;
 }
 .defense-area textarea:focus { border-color: var(--green); }
 .defense-area textarea::placeholder { color: var(--text3); }
 
 .accuse-row { display: flex; gap: 6px; margin-top: 8px; }
 .accuse-row input {
-  flex: 1;
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  padding: 6px 10px;
-  outline: none;
-  transition: border-color 0.15s;
+  flex: 1; background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 12px; padding: 6px 10px; outline: none; transition: border-color 0.15s;
 }
 .accuse-row input:focus { border-color: var(--red); }
 .accuse-row input::placeholder { color: var(--text3); }
 
 .btn-small {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  border: none;
-  transition: opacity 0.15s;
-  white-space: nowrap;
+  font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600;
+  padding: 6px 12px; border-radius: 8px; cursor: pointer; border: none;
+  transition: opacity 0.15s; white-space: nowrap;
 }
 .btn-small:hover { opacity: 0.8; }
+.btn-small:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-save { background: rgba(29,158,117,0.2); color: var(--green); margin-top: 6px; }
 .btn-accuse { background: rgba(226,75,74,0.2); color: var(--red); }
+.btn-defend { background: rgba(29,158,117,0.2); color: var(--green); }
 
 .loading { text-align: center; padding: 3rem; color: var(--text2); font-size: 14px; }
 .loading-dot { display: inline-block; animation: blink 1s infinite; }
 .loading-dot:nth-child(2) { animation-delay: 0.2s; }
 .loading-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes blink { 0%,80%,100% { opacity: 0; } 40% { opacity: 1; } }
+@keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
 
 .toast {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  border-radius: 10px;
-  padding: 10px 16px;
-  font-size: 13px;
-  color: var(--text);
-  opacity: 0;
-  transform: translateY(8px);
-  transition: all 0.2s;
-  pointer-events: none;
-  z-index: 999;
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 10px 16px; font-size: 13px;
+  opacity: 0; transform: translateY(8px); transition: all 0.2s;
+  pointer-events: none; z-index: 999;
 }
 .toast.show { opacity: 1; transform: translateY(0); }
 .toast.ok { border-color: var(--green); color: var(--green); }
@@ -279,6 +233,7 @@ body {
   .header { padding: 1.25rem; }
   .main { padding: 1rem; }
   .votes-row { margin-left: auto; }
+  .member-banner { padding: 10px 1rem; flex-wrap: wrap; }
 }
 </style>
 </head>
@@ -301,6 +256,8 @@ body {
   </div>
 </header>
 
+<div id="member-banner"></div>
+
 <div class="main">
   <div class="sort-label">Ordenados por puntuación neta — verde arriba, rojo abajo</div>
   <div id="list"><div class="loading"><span class="loading-dot">•</span><span class="loading-dot">•</span><span class="loading-dot">•</span></div></div>
@@ -313,11 +270,17 @@ const SUPABASE_URL = 'https://wqgfzealpghlripqgqlg.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxZ2Z6ZWFscGdobHJpcHFncWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MzU5NjgsImV4cCI6MjA5MzIxMTk2OH0.PiU7nBt5xS7qjNLroa3MgX-LkLCT_6MkfPG5p1pRp80';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Detectar si el usuario tiene su link propio
+const urlParams = new URLSearchParams(window.location.search);
+const MY_ID = urlParams.get('member') || null;
+
 let members = [];
 let votes = {};
+let defenses = {}; // defensas de otros hacia cada miembro
 let accusations = {};
-let userVotes = JSON.parse(localStorage.getItem('userVotes') || '{}');
+let userVotes = JSON.parse(localStorage.getItem('uv_tribunal') || '{}');
 let expanded = {};
+let voting = {}; // bloqueo anti-doble click
 
 const AVATAR_COLORS = [
   ['#1a2a3a','#5ba4d4'],['#1a2218','#5db87a'],['#2a1a1a','#d47a5b'],
@@ -342,32 +305,37 @@ function toast(msg, type='ok') {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.className = 'toast show ' + type;
-  setTimeout(() => el.className = 'toast', 2200);
+  setTimeout(() => el.className = 'toast', 2500);
 }
 
-// Función que carga TODAS las filas paginando de 1000 en 1000
-async function fetchAll(table, columns) {
-  let allData = [];
+function escHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Carga paginada sin límite — aguanta 30k+ sin problema
+async function fetchAllPaged(table, columns) {
+  let all = [];
   let from = 0;
-  const pageSize = 1000;
+  const PAGE = 1000;
   while (true) {
-    const { data, error } = await sb.from(table).select(columns).range(from, from + pageSize - 1);
+    const { data, error } = await sb.from(table).select(columns).range(from, from + PAGE - 1);
     if (error || !data || data.length === 0) break;
-    allData = allData.concat(data);
-    if (data.length < pageSize) break;
-    from += pageSize;
+    all = all.concat(data);
+    if (data.length < PAGE) break;
+    from += PAGE;
   }
-  return allData;
+  return all;
 }
 
 async function loadAll() {
-  const [membersData, votesData, accusationsData] = await Promise.all([
+  const [membersRes, votesData, defensesData, accusationsData] = await Promise.all([
     sb.from('members').select('id, name, username, defense, created_at').order('created_at').then(r => r.data || []),
-    fetchAll('votes', '*'),
-    fetchAll('accusations', '*'),
+    fetchAllPaged('votes', 'member_id, type'),
+    fetchAllPaged('defenses', '*'),
+    fetchAllPaged('accusations', '*'),
   ]);
 
-  members = membersData;
+  members = membersRes;
 
   votes = {};
   for (const v of votesData) {
@@ -375,10 +343,32 @@ async function loadAll() {
     votes[v.member_id][v.type]++;
   }
 
+  defenses = {};
+  for (const d of defensesData) {
+    if (!defenses[d.member_id]) defenses[d.member_id] = [];
+    defenses[d.member_id].push(d);
+  }
+
   accusations = {};
   for (const a of accusationsData) {
     if (!accusations[a.member_id]) accusations[a.member_id] = [];
     accusations[a.member_id].push(a);
+  }
+
+  // Mostrar banner si el usuario tiene su link
+  if (MY_ID) {
+    const me = members.find(m => m.id === MY_ID);
+    if (me) {
+      const banner = document.getElementById('member-banner');
+      const myUrl = window.location.origin + window.location.pathname + '?member=' + MY_ID;
+      banner.innerHTML = `<div class="member-banner">
+        ⚖️ Estás viendo el Tribunal como <strong>${escHtml(me.name)}</strong> — puedes editar tu propia defensa
+        <button class="copy-link" onclick="copyMyLink()">Copiar mi link</button>
+      </div>`;
+      window.copyMyLink = function() {
+        navigator.clipboard.writeText(myUrl).then(() => toast('Link copiado'));
+      };
+    }
   }
 
   updateStats();
@@ -388,8 +378,8 @@ async function loadAll() {
 function updateStats() {
   document.getElementById('stat-members').textContent = members.length;
   let total = 0;
-  Object.values(votes).forEach(v => total += v.green + v.red);
-  document.getElementById('stat-votes').textContent = total;
+  for (const v of Object.values(votes)) total += v.green + v.red;
+  document.getElementById('stat-votes').textContent = total.toLocaleString();
 }
 
 function sorted() {
@@ -409,77 +399,118 @@ function render() {
     const sc = score(m);
     const scClass = sc>0 ? 'score-pill score-pos' : sc<0 ? 'score-pill score-neg' : 'score-pill score-neu';
     const scTxt = sc>0 ? '+'+sc : ''+sc;
-    const cardClass = i===0 ? 'member-card rank-top' : (i===s.length-1 ? 'member-card rank-bot' : 'member-card');
+    const isMe = MY_ID === m.id;
+    const cardClass = [
+      i===0 ? 'member-card rank-top' : i===s.length-1 ? 'member-card rank-bot' : 'member-card',
+      isMe ? 'is-me' : ''
+    ].join(' ');
     const vg = userVotes[m.id]==='green';
     const vr = userVotes[m.id]==='red';
     const isOpen = expanded[m.id];
     const accList = accusations[m.id] || [];
+    const defList = defenses[m.id] || [];
+    const isVoting = voting[m.id];
 
+    // Comentarios visibles
     let commentsHtml = '';
-    if (m.defense) commentsHtml += `<div class="comment-item comment-defense"><div class="comment-meta">Defensa del miembro</div>${escHtml(m.defense)}</div>`;
-    accList.forEach(a => {
-      commentsHtml += `<div class="comment-item comment-accuse"><div class="comment-meta">Acusación</div>${escHtml(a.text)}</div>`;
+    if (m.defense) {
+      commentsHtml += `<div class="comment-item comment-own-defense">
+        <div class="comment-meta">✋ Defensa propia</div>${escHtml(m.defense)}
+      </div>`;
+    }
+    defList.forEach(d => {
+      commentsHtml += `<div class="comment-item comment-defense">
+        <div class="comment-meta">🛡️ Defensa</div>${escHtml(d.text)}
+      </div>`;
     });
+    accList.forEach(a => {
+      commentsHtml += `<div class="comment-item comment-accuse">
+        <div class="comment-meta">⚡ Acusación</div>${escHtml(a.text)}
+      </div>`;
+    });
+
+    // Sección expandida
+    let expandedHtml = '';
+    if (isOpen) {
+      expandedHtml = `<div class="comments-section">
+        ${commentsHtml || '<div style="color:var(--text3);font-size:12px;padding:4px 0">Sin defensas ni acusaciones aún</div>'}
+        ${isMe ? `
+        <div class="own-defense-edit">
+          <label>✏️ Tu defensa (solo tú puedes editarla)</label>
+          <textarea id="def-${m.id}" placeholder="¿Por qué deberías quedarte?">${escHtml(m.defense||'')}</textarea>
+          <button class="btn-small btn-save" onclick="saveDefense('${m.id}')">Guardar defensa</button>
+        </div>` : ''}
+        <div class="defense-area" style="margin-top:10px">
+          <label>Defender a ${escHtml(m.name.split(' ')[0])}</label>
+          <textarea id="defe-${m.id}" placeholder="¿Por qué debería quedarse?" rows="2"></textarea>
+          <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+            <button class="btn-small btn-defend" onclick="addDefense('${m.id}')">+ Defender</button>
+          </div>
+        </div>
+        <div class="accuse-row" style="margin-top:8px">
+          <input id="acc-${m.id}" placeholder="Razón para echarlo..." maxlength="200" />
+          <button class="btn-small btn-accuse" onclick="addAccusation('${m.id}')">+ Acusación</button>
+        </div>
+      </div>`;
+    }
 
     return `<div class="${cardClass}" id="card-${m.id}">
       <div class="card-main">
         <span class="rank-num">#${i+1}</span>
         <div class="avatar" style="${getAvatarStyle(m.id)}">${initials(m.name)}</div>
         <div class="member-info">
-          <div class="member-name">${escHtml(m.name)} <span class="${scClass}">${scTxt}</span></div>
+          <div class="member-name">${escHtml(m.name)}${isMe ? '<span class="me-badge">Tú</span>' : ''} <span class="${scClass}">${scTxt}</span></div>
           <div class="member-user">${escHtml(m.username)}</div>
         </div>
         <div class="votes-row">
-          <button class="vote-btn ${vg?'voted-green':''}" onclick="vote('${m.id}','green')">
-            <span class="vote-icon">👍</span> ${v.green}
+          <button class="vote-btn ${vg?'voted-green':''}" ${isVoting?'disabled':''} onclick="vote('${m.id}','green')">
+            👍 ${v.green}
           </button>
-          <button class="vote-btn ${vr?'voted-red':''}" onclick="vote('${m.id}','red')">
-            <span class="vote-icon">👎</span> ${v.red}
+          <button class="vote-btn ${vr?'voted-red':''}" ${isVoting?'disabled':''} onclick="vote('${m.id}','red')">
+            👎 ${v.red}
           </button>
         </div>
       </div>
-      ${m.defense ? `<div class="defense-preview"><div class="defense-label">Su defensa</div>${escHtml(m.defense)}</div>` : ''}
-      <button class="expand-btn" onclick="toggleExpand('${m.id}')">${isOpen ? '▲ Ocultar' : '▼ Defensa y acusaciones'}</button>
-      ${isOpen ? `<div class="comments-section">
-        ${commentsHtml}
-        <div class="defense-area">
-          <label>Defensa del miembro</label>
-          <textarea id="def-${m.id}" placeholder="¿Por qué debería quedarse?">${escHtml(m.defense||'')}</textarea>
-          <button class="btn-small btn-save" onclick="saveDefense('${m.id}')">Guardar defensa</button>
-        </div>
-        <div class="accuse-row">
-          <input id="acc-${m.id}" placeholder="Razón para echarlo..." maxlength="200" />
-          <button class="btn-small btn-accuse" onclick="addAccusation('${m.id}')">+ Acusación</button>
-        </div>
-      </div>` : ''}
+      ${m.defense && !isOpen ? `<div class="defense-preview"><div class="defense-label">Su defensa</div>${escHtml(m.defense)}</div>` : ''}
+      <button class="expand-btn" onclick="toggleExpand('${m.id}')">
+        ${isOpen ? '▲ Ocultar' : `▼ Defensas y acusaciones (${defList.length + accList.length + (m.defense?1:0)})`}
+      </button>
+      ${expandedHtml}
     </div>`;
   }).join('');
 }
 
-function escHtml(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
 async function vote(memberId, type) {
+  if (voting[memberId]) return;
+  voting[memberId] = true;
+  render();
+
   const prev = userVotes[memberId];
   if (!votes[memberId]) votes[memberId] = {green:0,red:0};
 
-  if (prev === type) {
-    userVotes[memberId] = null;
-    votes[memberId][type] = Math.max(0, votes[memberId][type] - 1);
-    await sb.from('votes').delete().eq('member_id', memberId).eq('type', type).limit(1);
-  } else {
-    if (prev) {
-      votes[memberId][prev] = Math.max(0, votes[memberId][prev] - 1);
-      await sb.from('votes').delete().eq('member_id', memberId).eq('type', prev).limit(1);
+  try {
+    if (prev === type) {
+      // Quitar voto
+      userVotes[memberId] = null;
+      votes[memberId][type] = Math.max(0, votes[memberId][type] - 1);
+      await sb.from('votes').delete().eq('member_id', memberId).eq('type', type).limit(1);
+    } else {
+      if (prev) {
+        // Cambiar voto
+        votes[memberId][prev] = Math.max(0, votes[memberId][prev] - 1);
+        await sb.from('votes').delete().eq('member_id', memberId).eq('type', prev).limit(1);
+      }
+      userVotes[memberId] = type;
+      votes[memberId][type]++;
+      await sb.from('votes').insert({member_id: memberId, type});
     }
-    userVotes[memberId] = type;
-    votes[memberId][type]++;
-    await sb.from('votes').insert({member_id: memberId, type});
+    localStorage.setItem('uv_tribunal', JSON.stringify(userVotes));
+    updateStats();
+  } catch(e) {
+    toast('Error al votar', 'err');
   }
 
-  localStorage.setItem('userVotes', JSON.stringify(userVotes));
-  updateStats();
+  voting[memberId] = false;
   render();
 }
 
@@ -489,17 +520,38 @@ function toggleExpand(id) {
 }
 
 async function saveDefense(memberId) {
+  if (MY_ID !== memberId) return;
   const el = document.getElementById('def-' + memberId);
   if (!el) return;
   const text = el.value.trim();
+  const btn = el.nextElementSibling;
+  btn.disabled = true;
   const {error} = await sb.from('members').update({defense: text}).eq('id', memberId);
   if (!error) {
     const m = members.find(x=>x.id===memberId);
     if (m) m.defense = text;
-    toast('Defensa guardada');
+    toast('Defensa guardada ✓');
     render();
   } else {
     toast('Error al guardar', 'err');
+    btn.disabled = false;
+  }
+}
+
+async function addDefense(memberId) {
+  const el = document.getElementById('defe-' + memberId);
+  if (!el) return;
+  const text = el.value.trim();
+  if (!text) { toast('Escribe algo', 'err'); return; }
+  const {data, error} = await sb.from('defenses').insert({member_id: memberId, text}).select().single();
+  if (!error && data) {
+    if (!defenses[memberId]) defenses[memberId] = [];
+    defenses[memberId].push(data);
+    el.value = '';
+    toast('Defensa añadida 🛡️');
+    render();
+  } else {
+    toast('Error al añadir', 'err');
   }
 }
 
@@ -507,13 +559,13 @@ async function addAccusation(memberId) {
   const el = document.getElementById('acc-' + memberId);
   if (!el) return;
   const text = el.value.trim();
-  if (!text) return;
+  if (!text) { toast('Escribe algo', 'err'); return; }
   const {data, error} = await sb.from('accusations').insert({member_id: memberId, text}).select().single();
   if (!error && data) {
     if (!accusations[memberId]) accusations[memberId] = [];
     accusations[memberId].push(data);
     el.value = '';
-    toast('Acusación añadida');
+    toast('Acusación añadida ⚡');
     render();
   } else {
     toast('Error al añadir', 'err');
@@ -522,6 +574,5 @@ async function addAccusation(memberId) {
 
 loadAll();
 </script>
-
 </body>
 </html>
