@@ -501,17 +501,25 @@ async function saveDefense(memberId) {
 async function addDefense(memberId) {
   const el=document.getElementById('defe-'+memberId); if(!el) return;
   const text=el.value.trim(); if(!text){toast('Escribe algo','err');return;}
-  const {data,error}=await sb.from('defenses').insert({member_id:memberId,text}).select().single();
-  if(!error&&data){if(!defenses[memberId])defenses[memberId]=[];defenses[memberId].push(data);el.value='';toast('Defensa añadida 🛡️');renderRanking();}
-  else toast('Error al añadir','err');
+  const {error}=await sb.from('defenses').insert({member_id:memberId,text});
+  if(!error){
+    const fake={id:crypto.randomUUID(),member_id:memberId,text};
+    if(!defenses[memberId])defenses[memberId]=[];
+    defenses[memberId].push(fake);
+    el.value='';toast('Defensa añadida 🛡️');renderRanking();
+  } else toast('Error al añadir','err');
 }
 
 async function addAccusation(memberId) {
   const el=document.getElementById('acc-'+memberId); if(!el) return;
   const text=el.value.trim(); if(!text){toast('Escribe algo','err');return;}
-  const {data,error}=await sb.from('accusations').insert({member_id:memberId,text}).select().single();
-  if(!error&&data){if(!accusations[memberId])accusations[memberId]=[];accusations[memberId].push(data);el.value='';toast('Acusación añadida ⚡');renderRanking();}
-  else toast('Error al añadir','err');
+  const {error}=await sb.from('accusations').insert({member_id:memberId,text});
+  if(!error){
+    const fake={id:crypto.randomUUID(),member_id:memberId,text};
+    if(!accusations[memberId])accusations[memberId]=[];
+    accusations[memberId].push(fake);
+    el.value='';toast('Acusación añadida ⚡');renderRanking();
+  } else toast('Error al añadir','err');
 }
 
 loadAll();
